@@ -1,4 +1,5 @@
 import csv
+import re
 with open('Code Testing Doc.csv') as csvfile:
     #For a new csv file, change the above parenthesis
     cellreader = csv.reader(csvfile, delimiter=',')
@@ -58,9 +59,26 @@ with open('IntermediatePTMSheet.csv', 'w') as csvfile:
     for row_answer in answers:
         cellwriter.writerow(row_answer)
 #The code below is transferring the information above into the second csv file
-#with open('IntermediatePTMSheet2.csv', 'w') as csvfile:
-    #cellwriter = csv.writer(csvfile, delimiter=',')
-    #cellwriter.writerow(["Protein","Protein Description","Position","Residue","Unimod", "hPTM_ID"])
+with open('IntermediatePTMSheet2.csv', 'w') as csvfile:
+    cellwriter = csv.writer(csvfile, delimiter=',')
+    cellwriter.writerow(["Protein","Protein Description","Position","Residue","Unimod", "hPTM_ID"])
+    for row_answer in answers:
+        pattern = 'H\d[AB]?'
+        string = row_answer[1]
+        result = re.search(pattern, string)
+        #print(result.group())
+        all_mods=row_answer[5:]
+        for i in range(len(all_mods)):
+            if i%3==0:
+                position=all_mods[i]
+            if i%3==1:
+                residue=all_mods[i]
+            if i%3==2:
+                unimod=all_mods[i]
+                concat=row_answer[0]+"."+result.group()+"."+str(position)+"."+residue+"."+unimod
+                #print (position,residue,unimod)
+                cellwriter.writerow([row_answer[0],result.group(),position,residue,unimod,concat])
+        #print(row_answer[7],row_answer[0],row_answer[5],row_answer[6])
 
         # [LNKLLGGVTIAQGGVLPNIQAVLLPKKTEKPT(unimod:2646435463563)KSK(unimod:5)]
         # [LNKLLGGVTIAQGGVLPNIQAVLLPKKTEKPT 23)KSK 5)]
