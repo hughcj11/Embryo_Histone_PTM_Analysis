@@ -67,10 +67,20 @@ with open('IntermediatePTMSheet2.csv', 'w') as csvfile:
     cellwriter.writerow(["Protein","Protein Description","Position","Residue","Unimod", "hPTM_ID"])
     library=[]
     for row_answer in answers:
-        pattern = 'H\d[AB]?'
-        string = row_answer[1]
-        result = re.search(pattern, string)
-        #print(result.group())
+        found_histone=False
+        histone_result=""
+        full_histone = row_answer[1] #Ex. PREDICTED: histone H1 1/2 [Austrofundulus limnaeus]
+        parts = full_histone.split(" ")
+        for histone in parts:
+            if histone.startswith("["):
+                found_histone= False
+            if histone=="histone":
+                found_histone=True
+            elif found_histone==True:
+                if histone_result!="":
+                    histone_result=histone_result+"_"+histone
+                elif histone_result=="":
+                    histone_result=histone
         all_mods=row_answer[5:]
         for i in range(len(all_mods)):
             if i%3==0:
@@ -79,9 +89,9 @@ with open('IntermediatePTMSheet2.csv', 'w') as csvfile:
                 residue=all_mods[i]
             if i%3==2:
                 unimod=all_mods[i]
-                concat=row_answer[0]+"."+result.group()+"."+str(position)+"."+residue+"."+unimod
+                concat=row_answer[0]+"."+histone_result+"."+str(position)+"."+residue+"."+unimod
                 library.append(concat)
-                cellwriter.writerow([row_answer[0],result.group(),position,residue,unimod,concat])
+                cellwriter.writerow([row_answer[0],histone_result,position,residue,unimod,concat])
 
 
 
@@ -93,3 +103,6 @@ with open('HistonePTMLibrary.csv', 'w') as csvfile:
     library=set(library)
     for libraryanswer in library:
         cellwriter.writerow([libraryanswer])    
+
+
+
