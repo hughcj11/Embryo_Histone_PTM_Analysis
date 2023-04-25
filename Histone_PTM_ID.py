@@ -1,6 +1,5 @@
 import csv
-import re
-with open('Code Testing Doc.csv') as csvfile:
+with open("/Users/chelseahughes/Desktop/Histone Analysis/code/Testing code/Code Testing Doc.csv") as csvfile:
     #For a new csv file, change the above parenthesis
     cellreader = csv.reader(csvfile, delimiter=',')
     count=0
@@ -51,7 +50,7 @@ with open('Code Testing Doc.csv') as csvfile:
                     mod_pos=mod_pos+1         
         answers.append(answer)
 #The code below is transferring the information above into the first csv file
-with open('IntermediatePTMSheet.csv', 'w') as csvfile:
+with open('/Users/chelseahughes/Desktop/Histone Analysis/code/Testing code/IntermediatePTMSheet.csv', 'w') as csvfile:
     cellwriter = csv.writer(csvfile, delimiter=',')
     cellwriter.writerow(["","","", "","", "Modification 1", "", "", "Modification 2","", "", "Modification 3"])
     cellwriter.writerow(["Protein","Protein Description","Begin Pos", "End Pos","Unimod Acession", "Position", "Residue", "Unimod", "Position", "Residue", "Unimod", "Position", "Residue", "Unimod"])
@@ -61,11 +60,12 @@ with open('IntermediatePTMSheet.csv', 'w') as csvfile:
 
 
 
-#The code below is transferring the information above into the second csv file
-with open('IntermediatePTMSheet2.csv', 'w') as csvfile:
+#The code below is transferring the information above into the second csv file that will produce a hPTM ID
+with open('/Users/chelseahughes/Desktop/Histone Analysis/code/Testing code/IntermediatePTMSheet2.csv', 'w') as csvfile:
     cellwriter = csv.writer(csvfile, delimiter=',')
     cellwriter.writerow(["Protein","Protein Description","Position","Residue","Unimod", "hPTM_ID"])
     library=[]
+    uniquehistone=[]
     for row_answer in answers:
         found_histone=False
         histone_result=""
@@ -81,6 +81,7 @@ with open('IntermediatePTMSheet2.csv', 'w') as csvfile:
                     histone_result=histone_result+"_"+histone
                 elif histone_result=="":
                     histone_result=histone
+        uniquehistone.append(histone_result)
         all_mods=row_answer[5:]
         for i in range(len(all_mods)):
             if i%3==0:
@@ -96,8 +97,8 @@ with open('IntermediatePTMSheet2.csv', 'w') as csvfile:
 
 
 
-
-with open('HistonePTMLibrary.csv', 'w') as csvfile:
+#The below document lists only unique hPTM IDs
+with open('/Users/chelseahughes/Desktop/Histone Analysis/code/Testing code/HistonePTMLibrary.csv', 'w') as csvfile:
     cellwriter = csv.writer(csvfile, delimiter=',')
     cellwriter.writerow(["hPTM_ID","Protein Accession","Protein Description","Position","Amino Acid","Amino Acid Position","Unimod","PTM Description","Biological Relevance"])
     library=set(library)
@@ -106,3 +107,9 @@ with open('HistonePTMLibrary.csv', 'w') as csvfile:
 
 
 
+#The below document is a list of the unique histones identified 
+with open('/Users/chelseahughes/Desktop/Histone Analysis/code/Testing code/UniqueHistoneLibrary.csv', 'w') as csvfile:
+    cellwriter = csv.writer(csvfile, delimiter=',')
+    uniquehistone=set(uniquehistone)
+    for uniqueanswer in uniquehistone:
+        cellwriter.writerow([uniqueanswer])  
