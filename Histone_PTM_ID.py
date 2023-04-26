@@ -1,6 +1,6 @@
 import csv
-base_path = "/Users/chelseahughes/Desktop/Histone Analysis/code/Testing code"
-with open(base_path+"/Code Testing Doc.csv") as csvfile:
+base_path = "/Users/chelseahughes/Desktop/Histone Analysis/code/Embryo Library/"
+with open(base_path+"EmbryohPTMs_Unimod.csv") as csvfile:
     #For a new csv file, change the above parenthesis
     cellreader = csv.reader(csvfile, delimiter=',')
     count=0
@@ -14,11 +14,8 @@ with open(base_path+"/Code Testing Doc.csv") as csvfile:
         #For each row, we will get an answer
         answer=[row[1],row[2],row[5],row[6],ua]
         #Below defines which row we need to read to get several answers
-        parts = ua.split(".")
-        parts=parts[1:-1]
-        parts=".".join(parts)
         #The above code looks for the periods in the row in order to pull out the peptide sequence and ptms. This should split that cell into 3 parts
-        pep_seq=parts
+        pep_seq=row[3]
         last_amino=""
         #unimod refers to the type of modifcation 
         #mod_amino refers to the residue being modified 
@@ -66,6 +63,7 @@ with open(base_path+'IntermediatePTMSheet2.csv', 'w') as csvfile:
     cellwriter = csv.writer(csvfile, delimiter=',')
     cellwriter.writerow(["Protein","Protein Description","Position","Residue","Unimod", "hPTM_ID"])
     library=[]
+    libraryspace=[]
     uniquehistone=[]
     for row_answer in answers:
         found_histone=False
@@ -92,7 +90,9 @@ with open(base_path+'IntermediatePTMSheet2.csv', 'w') as csvfile:
             if i%3==2:
                 unimod=all_mods[i]
                 concat=row_answer[0]+"."+histone_result+"."+str(position)+"."+residue+"."+unimod
+                concatspace=row_answer[0]+"$"+histone_result+"$"+str(position)+"$"+residue+"$"+unimod
                 library.append(concat)
+                libraryspace.append(concatspace)
                 cellwriter.writerow([row_answer[0],histone_result,position,residue,unimod,concat])
 
 
@@ -103,6 +103,7 @@ with open(base_path+'HistonePTMLibrary.csv', 'w') as csvfile:
     cellwriter = csv.writer(csvfile, delimiter=',')
     cellwriter.writerow(["hPTM_ID","Protein Accession","Protein Description","Position","Amino Acid","Amino Acid Position","Unimod","PTM Description","Biological Relevance"])
     library=set(library)
+    #libraryspace=set(libraryspace)
     for libraryanswer in library:
         cellwriter.writerow([libraryanswer])    
 
