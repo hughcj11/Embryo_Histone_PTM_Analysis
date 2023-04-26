@@ -101,11 +101,26 @@ with open(base_path+'IntermediatePTMSheet2.csv', 'w') as csvfile:
 #The below document lists only unique hPTM IDs
 with open(base_path+'HistonePTMLibrary.csv', 'w') as csvfile:
     cellwriter = csv.writer(csvfile, delimiter=',')
-    cellwriter.writerow(["hPTM_ID","Protein Accession","Protein Description","Position","Amino Acid","Amino Acid Position","Unimod","PTM Description","Biological Relevance"])
-    library=set(library)
-    #libraryspace=set(libraryspace)
-    for libraryanswer in library:
-        cellwriter.writerow([libraryanswer])    
+    cellwriter.writerow(["hPTM_ID","Protein Accession","Protein Description","Position","Amino Acid","Amino Acid + Position","Unimod","PTM Description","Biological Relevance"])
+    pa=[]
+    pd=[]
+    pos=[]
+    aa=[]
+    aap=[]
+    um=[]
+    library=list(set(library))
+    libraryspace=list(set(libraryspace))
+    for parts in libraryspace:
+        allparts=parts.split("$")
+        pa.append(allparts[0])
+        pd.append(allparts[1])
+        pos.append(allparts[2])
+        aa.append(allparts[3])
+        aap.append(allparts[2]+allparts[3])
+        um.append(allparts[4])
+    for countindex in range(len(libraryspace)):
+        cellwriter.writerow([libraryspace[countindex].replace("$","."),pa[countindex],pd[countindex],pos[countindex],aa[countindex],aap[countindex],um[countindex]]) 
+     
 
 
 
