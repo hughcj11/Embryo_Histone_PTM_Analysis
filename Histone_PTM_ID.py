@@ -47,7 +47,7 @@ with open(base_path+"EmbryohPTMs_Unimod.csv") as csvfile:
             if should_count:
                     mod_pos=mod_pos+1         
         answers.append(answer)
-#The code below is transferring the information above into the first csv file
+#The code below is transferring the information above into the first Intermediate csv file
 with open(base_path+'IntermediatePTMSheet.csv', 'w') as csvfile:
     cellwriter = csv.writer(csvfile, delimiter=',')
     cellwriter.writerow(["","","", "","", "Modification 1", "", "", "Modification 2","", "", "Modification 3"])
@@ -89,6 +89,7 @@ with open(base_path+'IntermediatePTMSheet2.csv', 'w') as csvfile:
                 residue=all_mods[i]
             if i%3==2:
                 unimod=all_mods[i]
+               #uniqueunimod.append(unimod)
                 concat=row_answer[0]+"."+histone_result+"."+str(position)+"."+residue+"."+unimod
                 concatspace=row_answer[0]+"$"+histone_result+"$"+str(position)+"$"+residue+"$"+unimod
                 library.append(concat)
@@ -108,6 +109,7 @@ with open(base_path+'HistonePTMLibrary.csv', 'w') as csvfile:
     aa=[]
     aap=[]
     um=[]
+    uniqueunimod=[]
     library=list(set(library))
     libraryspace=list(set(libraryspace))
     for parts in libraryspace:
@@ -118,6 +120,7 @@ with open(base_path+'HistonePTMLibrary.csv', 'w') as csvfile:
         aa.append(allparts[3])
         aap.append(allparts[2]+allparts[3])
         um.append(allparts[4])
+        uniqueunimod.append(allparts[4]+"+"+allparts[3]) 
     for countindex in range(len(libraryspace)):
         cellwriter.writerow([libraryspace[countindex].replace("$","."),pa[countindex],pd[countindex],pos[countindex],aa[countindex],aap[countindex],um[countindex]]) 
      
@@ -130,3 +133,13 @@ with open(base_path+'UniqueHistoneLibrary.csv', 'w') as csvfile:
     uniquehistone=set(uniquehistone)
     for uniqueanswer in uniquehistone:
         cellwriter.writerow([uniqueanswer])  
+
+
+#The below document is a list of the unique unimods+residue identified so that the master list can be updated
+with open(base_path+'UniqueUnimodLibrary.csv', 'w') as csvfile:
+    cellwriter = csv.writer(csvfile, delimiter=',')
+    cellwriter.writerow(["unimod+residue"])
+    uniqueunimod=set(uniqueunimod)
+    for uniquemod in uniqueunimod:
+        cellwriter.writerow([uniquemod])  
+
