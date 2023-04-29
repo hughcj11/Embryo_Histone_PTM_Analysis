@@ -1,7 +1,17 @@
 import csv
 base_path = "/Users/chelseahughes/Desktop/Histone Analysis/code/Embryo Library/"
+#Below creates a dictionary within the code of unimod IDs and their biological relevance for later use.
+with open("/Users/chelseahughes/Desktop/Histone Analysis/code/Testing code/UnimodLibrary.csv") as csvfile:
+    cellreader = csv.reader(csvfile, delimiter=',')
+    dictionary={}
+    for row in cellreader:
+        key= row[0] + row[1]
+        value=[row[2], row[3]]
+        dictionary[key]=value
+
+#The below code is opening the csv data from Skyline and assigning variables to each row
 with open(base_path+"EmbryohPTMs_Unimod.csv") as csvfile:
-    #For a new csv file, change the above parenthesis
+    #For a new csv file, change the above parenthesis to reflect your base path and specific document
     cellreader = csv.reader(csvfile, delimiter=',')
     count=0
     #For all rows, we collect "answers" in a list. These are the answers that we are getting as we go row by row
@@ -14,7 +24,6 @@ with open(base_path+"EmbryohPTMs_Unimod.csv") as csvfile:
         #For each row, we will get an answer
         answer=[row[1],row[2],row[5],row[6],ua]
         #Below defines which row we need to read to get several answers
-        #The above code looks for the periods in the row in order to pull out the peptide sequence and ptms. This should split that cell into 3 parts
         pep_seq=row[3]
         last_amino=""
         #unimod refers to the type of modifcation 
@@ -47,7 +56,7 @@ with open(base_path+"EmbryohPTMs_Unimod.csv") as csvfile:
             if should_count:
                     mod_pos=mod_pos+1         
         answers.append(answer)
-#The code below is transferring the information above into the first Intermediate csv file
+#The code below is transferring the information above into the first intermediate csv file (IntermediatePTMSheet). This intermediate sheet pulls out all the modifications on each peptide 
 with open(base_path+'IntermediatePTMSheet.csv', 'w') as csvfile:
     cellwriter = csv.writer(csvfile, delimiter=',')
     cellwriter.writerow(["","","", "","", "Modification 1", "", "", "Modification 2","", "", "Modification 3"])
@@ -58,7 +67,7 @@ with open(base_path+'IntermediatePTMSheet.csv', 'w') as csvfile:
 
 
 
-#The code below is transferring the information above into the second csv file that will produce a hPTM ID
+#The code below is transferring the information above into the second csv file (IntermediatePTMSheet2) that will ultimately produce hPTM IDs
 with open(base_path+'IntermediatePTMSheet2.csv', 'w') as csvfile:
     cellwriter = csv.writer(csvfile, delimiter=',')
     cellwriter.writerow(["Protein","Protein Description","Position","Residue","Unimod", "hPTM_ID"])
@@ -99,7 +108,7 @@ with open(base_path+'IntermediatePTMSheet2.csv', 'w') as csvfile:
 
 
 
-#The below document lists only unique hPTM IDs
+#The below document lists only unique hPTM IDs and determines if they are biologically relevant
 with open(base_path+'HistonePTMLibrary.csv', 'w') as csvfile:
     cellwriter = csv.writer(csvfile, delimiter=',')
     cellwriter.writerow(["hPTM_ID","Protein Accession","Protein Description","Position","Amino Acid","Amino Acid + Position","Unimod","PTM Description","Biological Relevance"])
@@ -122,7 +131,13 @@ with open(base_path+'HistonePTMLibrary.csv', 'w') as csvfile:
         um.append(allparts[4])
         uniqueunimod.append(allparts[4]+"+"+allparts[3]) 
     for countindex in range(len(libraryspace)):
-        cellwriter.writerow([libraryspace[countindex].replace("$","."),pa[countindex],pd[countindex],pos[countindex],aa[countindex],aap[countindex],um[countindex]]) 
+        if aa[countindex]+um[countindex] in dictionary.keys():
+            unimodname=dictionary[aa[countindex]+um[countindex]][0]
+            biorelevance=dictionary[aa[countindex]+um[countindex]][1]
+        else:
+            unimodname=""
+            biorelevance=""    
+        cellwriter.writerow([libraryspace[countindex].replace("$","."),pa[countindex],pd[countindex],pos[countindex],aa[countindex],aap[countindex],um[countindex],unimodname, biorelevance]) 
      
 
 
@@ -135,7 +150,7 @@ with open(base_path+'UniqueHistoneLibrary.csv', 'w') as csvfile:
         cellwriter.writerow([uniqueanswer])  
 
 
-#The below document is a list of the unique unimods+residue identified so that the master list can be updated
+#The below document is a list of the unique unimods+residue identified. This can be used to update the master list of hPTMS and their biological relevance
 with open(base_path+'UniqueUnimodLibrary.csv', 'w') as csvfile:
     cellwriter = csv.writer(csvfile, delimiter=',')
     cellwriter.writerow(["unimod+residue"])
@@ -143,3 +158,4 @@ with open(base_path+'UniqueUnimodLibrary.csv', 'w') as csvfile:
     for uniquemod in uniqueunimod:
         cellwriter.writerow([uniquemod])  
 
+#The below document is a version of the HistonePTMLibrary with only the biologically relevant modifications included
