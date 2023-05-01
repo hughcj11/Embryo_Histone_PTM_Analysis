@@ -119,6 +119,7 @@ with open(base_path+'HistonePTMLibrary.csv', 'w') as csvfile:
     aap=[]
     um=[]
     uniqueunimod=[]
+    biorellist=[]
     library=list(set(library))
     libraryspace=list(set(libraryspace))
     for parts in libraryspace:
@@ -134,6 +135,8 @@ with open(base_path+'HistonePTMLibrary.csv', 'w') as csvfile:
         if aa[countindex]+um[countindex] in dictionary.keys():
             unimodname=dictionary[aa[countindex]+um[countindex]][0]
             biorelevance=dictionary[aa[countindex]+um[countindex]][1]
+            if biorelevance=="Yes":
+                biorellist.append([libraryspace[countindex].replace("$","."),pa[countindex],pd[countindex],pos[countindex],aa[countindex],aap[countindex],um[countindex],unimodname, biorelevance]) 
         else:
             unimodname=""
             biorelevance=""    
@@ -159,3 +162,8 @@ with open(base_path+'UniqueUnimodLibrary.csv', 'w') as csvfile:
         cellwriter.writerow([uniquemod])  
 
 #The below document is a version of the HistonePTMLibrary with only the biologically relevant modifications included
+with open(base_path+'BioRelevantHistonePTMLibrary.csv', 'w') as csvfile:
+    cellwriter = csv.writer(csvfile, delimiter=',')
+    cellwriter.writerow(["hPTM_ID","Protein Accession","Protein Description","Position","Amino Acid","Amino Acid + Position","Unimod","PTM Description","Biological Relevance"])
+    for rowanswer in biorellist:
+        cellwriter.writerow([rowanswer])  
