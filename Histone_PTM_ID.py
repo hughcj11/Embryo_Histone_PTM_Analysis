@@ -166,4 +166,4 @@ with open(base_path+'BioRelevantHistonePTMLibrary.csv', 'w') as csvfile:
     cellwriter = csv.writer(csvfile, delimiter=',')
     cellwriter.writerow(["hPTM_ID","Protein Accession","Protein Description","Position","Amino Acid","Amino Acid + Position","Unimod","PTM Description","Biological Relevance"])
     for rowanswer in biorellist:
-        cellwriter.writerow([rowanswer])  
+        cellwriter.writerow(rowanswer)  
