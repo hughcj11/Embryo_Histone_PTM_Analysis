@@ -1,4 +1,5 @@
 import csv
+import re
 base_path = "/Users/chelseahughes/Desktop/Histone Analysis/code/Embryo Library/"
 #Below creates a dictionary within the code of unimod IDs and their biological relevance for later use.
 with open("/Users/chelseahughes/Desktop/Histone Analysis/code/Testing code/UnimodLibrary.csv") as csvfile:
@@ -25,6 +26,10 @@ with open(base_path+"EmbryohPTMs_Unimod.csv") as csvfile:
         answer=[row[1],row[2],row[5],row[6],ua]
         #Below defines which row we need to read to get several answers
         pep_seq=row[3]
+        pattern = '\[.*\]'
+        result = re.search(pattern, pep_seq)
+        if result!=None:
+            pep_seq=pep_seq.replace(result.group(),"")
         last_amino=""
         #unimod refers to the type of modifcation 
         #mod_amino refers to the residue being modified 
