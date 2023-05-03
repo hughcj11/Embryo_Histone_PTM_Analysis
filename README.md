@@ -1,9 +1,15 @@
 # Histone_PTM_Analysis
 https://github.com/hughcj11/Histone_PTM_Analysis
 
-The following code works on csv files downloaded from Skyline. The abundance data from Skyline should contain the following information in this order: Peptide, Protein, Protein Description, Unimode Accession, Peptide Modified Sequence, Begin Pos, End Pos, Average Measured Retention Time, and the Normalized Area of each Replicate. If Skyline is listing replicates one by one in a row instead of columns, check the "Pivot Replicates" button.
+The following code works on a csv file downloaded from Skyline, which should contain the following information in this order: Peptide, Protein, Protein Description, Unimod Accession, Peptide Modified Sequence, Begin Pos, End Pos, Average Measured Retention Time, and the Normalized Area of each Replicate. If Skyline is listing replicates one by one in a row instead of columns, check the "Pivot Replicates" button.
+    *Note: For this code to work, the Skyline output for Unimod Accession should contain only the peptide sequence and the unimod in (). Any mass shifts that do not have Unimod IDs are displayed in [] and will be removed at this time. To account for these mass shifts, additional code will need to be written in this file.
+Additionally, this code will require a reference library of Unimod IDs and their biological relevance. This document will be referenced in the code as a biological relevance dictionary. This document should be updated regularly to ensure the information remains accurate.
 
-The code will generate the following 6 documents using the Skyline csv file: IntermediateSheet, IntermediateSheet2, HistonePTMLibrary, BioRelevantHistonePTMLibrary, UniqueHistoneLibrary, and UniqueUnimodLibrary.
+The following code will generate the following 6 documents using the Skyline csv file: IntermediateSheet, IntermediateSheet2, HistonePTMLibrary, BioRelevantHistonePTMLibrary, UniqueHistoneLibrary, and UniqueUnimodLibrary.
+    
+    IntermediatePTMSheet: pulls out all the modifications on each peptide
+    
+    IntermediatePTMSheet2: will  produce hPTM IDs
 
     HistonePTMLibrary: provides a list of unique modifications found in the data, both biologically relevant and not
 
