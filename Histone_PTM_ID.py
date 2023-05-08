@@ -14,11 +14,15 @@ with open("/Users/chelseahughes/Desktop/Histone Analysis/code/Testing code/Unimo
 with open(base_path+"EmbryohPTMs_Unimod.csv") as csvfile:
     #For a new csv file, change the above parenthesis to reflect your base path and specific document
     cellreader = csv.reader(csvfile, delimiter=',')
+    abundance={}
+    replicatename=[]
     count=0
     #For all rows, we collect "answers" in a list. These are the answers that we are getting as we go row by row
     answers=[]
     for row in cellreader:
         count=count+1
+        if count==1:
+            replicatename=row[8:]
         if count<=2:
             continue
         ua=row[3]
@@ -44,6 +48,24 @@ with open(base_path+"EmbryohPTMs_Unimod.csv") as csvfile:
                 answer.append(pep_mod_pos)
                 answer.append(mod_amino)
                 answer.append(unimod)
+                key=row[1]+str(pep_mod_pos)+mod_amino+unimod
+                replicatesclean=[]
+                replicates=row[8:]
+                for rep in replicates:
+                    if rep=="#N/A":
+                        rep=0
+                        replicatesclean.append(rep)
+                    else:
+                         replicatesclean.append(rep)
+                replicates=replicatesclean
+                if key in abundance.keys():
+                    repsum=[] 
+                    ziplist=zip(abundance[key],map(float,replicates))
+                    for groupedreps in ziplist:
+                        repsum.append(sum(groupedreps))  
+                    abundance[key]=repsum
+                else:
+                    abundance[key]=list(map(float,replicates))
                 #After the answer is recorded, the below text "resets" the code to count again
                 mod_amino=""
                 unimod=""
@@ -171,4 +193,17 @@ with open(base_path+'BioRelevantHistonePTMLibrary.csv', 'w') as csvfile:
     cellwriter = csv.writer(csvfile, delimiter=',')
     cellwriter.writerow(["hPTM_ID","Protein Accession","Protein Description","Position","Amino Acid","Amino Acid + Position","Unimod","PTM Description","Biological Relevance"])
     for rowanswer in biorellist:
+        cellwriter.writerow(rowanswer)  
+
+#The below document is a version of the biologically relevant HistonePTMLibrary with the relative abundance calculated for each PTM type
+with open(base_path+'Replicate calculations.csv', 'w') as csvfile:
+    cellwriter = csv.writer(csvfile, delimiter=',')
+    cellwriter.writerow(["hPTM_ID","Protein Accession","Protein Description","Position","Amino Acid","Amino Acid + Position","Unimod","PTM Description","Biological Relevance"]+replicatename)
+    for rowanswer in biorellist:
+        key=rowanswer[1]+rowanswer[3]+rowanswer[4]+rowanswer[6]
+        if key in abundance.keys():
+            rowanswer.extend(abundance[key])
+        else:
+            for something in replicatename:
+                rowanswer.append(0)
         cellwriter.writerow(rowanswer)  
