@@ -15,6 +15,7 @@ with open(base_path+"EmbryohPTMs_Unimod.csv") as csvfile:
     #For a new csv file, change the above parenthesis to reflect your base path and specific document
     cellreader = csv.reader(csvfile, delimiter=',')
     abundance={}
+    aminomap={}
     replicatename=[]
     count=0
     #For all rows, we collect "answers" in a list. These are the answers that we are getting as we go row by row
@@ -28,8 +29,9 @@ with open(base_path+"EmbryohPTMs_Unimod.csv") as csvfile:
         ua=row[3]
         #For each row, we will get an answer
         answer=[row[1],row[2],row[5],row[6],ua]
-        #Below defines which row we need to read to get several answers
+        #Below defines which row we need to begin reading to get several "answers", including the unimod and its position/residue
         pep_seq=row[3]
+        #The below code removes any mass shifts that are not unimods, which appear in the Skyline data in brackets [].
         pattern = '\[.*\]'
         result = re.search(pattern, pep_seq)
         if result!=None:
@@ -42,6 +44,15 @@ with open(base_path+"EmbryohPTMs_Unimod.csv") as csvfile:
         unimod=""
         mod_pos=-1
         should_count=True
+        replicatesclean=[]
+        replicates=row[8:]
+        for rep in replicates:
+            if rep=="#N/A":
+                rep=0
+                replicatesclean.append(rep)
+            else:
+                replicatesclean.append(rep)
+        replicates=replicatesclean
         for amino in pep_seq: 
             if amino==")":
                 pep_mod_pos=mod_pos+int(row[5])
@@ -49,15 +60,7 @@ with open(base_path+"EmbryohPTMs_Unimod.csv") as csvfile:
                 answer.append(mod_amino)
                 answer.append(unimod)
                 key=row[1]+str(pep_mod_pos)+mod_amino+unimod
-                replicatesclean=[]
-                replicates=row[8:]
-                for rep in replicates:
-                    if rep=="#N/A":
-                        rep=0
-                        replicatesclean.append(rep)
-                    else:
-                         replicatesclean.append(rep)
-                replicates=replicatesclean
+                
                 if key in abundance.keys():
                     repsum=[] 
                     ziplist=zip(abundance[key],map(float,replicates))
@@ -81,7 +84,18 @@ with open(base_path+"EmbryohPTMs_Unimod.csv") as csvfile:
                     unimod=amino
             last_amino=amino
             if should_count:
-                    mod_pos=mod_pos+1         
+                mod_pos=mod_pos+1
+            #The below code is making a dictionary for each histon+amino acid+position that will have an associated replicates value. 
+            #/this dictionary and its replicates will be referenced later to determine total possible abundance of hPTMs.       
+                mapmap=row[1]+str(mod_pos+int(row[5]))+amino
+                if mapmap in aminomap.keys():
+                    mapvalue=[] 
+                    ziplist=zip(aminomap[mapmap],map(float,replicates))
+                    for groupedreps in ziplist:
+                        mapvalue.append(sum(groupedreps))  
+                    aminomap[mapmap]=mapvalue
+                else:
+                    aminomap[mapmap]=list(map(float,replicates))       
         answers.append(answer)
 #The code below is transferring the information above into the first intermediate csv file (IntermediatePTMSheet). This intermediate sheet pulls out all the modifications on each peptide 
 with open(base_path+'IntermediatePTMSheet.csv', 'w') as csvfile:
@@ -162,7 +176,7 @@ with open(base_path+'HistonePTMLibrary.csv', 'w') as csvfile:
         if aa[countindex]+um[countindex] in dictionary.keys():
             unimodname=dictionary[aa[countindex]+um[countindex]][0]
             biorelevance=dictionary[aa[countindex]+um[countindex]][1]
-            if biorelevance=="Yes":
+            if biorelevance=="Yes" or biorelevance=="Not specified":
                 biorellist.append([libraryspace[countindex].replace("$","."),pa[countindex],pd[countindex],pos[countindex],aa[countindex],aap[countindex],um[countindex],unimodname, biorelevance]) 
         else:
             unimodname=""
@@ -198,12 +212,16 @@ with open(base_path+'BioRelevantHistonePTMLibrary.csv', 'w') as csvfile:
 #The below document is a version of the biologically relevant HistonePTMLibrary with the relative abundance calculated for each PTM type
 with open(base_path+'Replicate calculations.csv', 'w') as csvfile:
     cellwriter = csv.writer(csvfile, delimiter=',')
-    cellwriter.writerow(["hPTM_ID","Protein Accession","Protein Description","Position","Amino Acid","Amino Acid + Position","Unimod","PTM Description","Biological Relevance"]+replicatename)
+    cellwriter.writerow(["hPTM_ID","Protein Accession","Protein Description","Position","Amino Acid","Amino Acid + Position","Unimod","PTM Description","Biological Relevance"]+replicatename+[""]+replicatename)
     for rowanswer in biorellist:
         key=rowanswer[1]+rowanswer[3]+rowanswer[4]+rowanswer[6]
+        mapmap=rowanswer[1]+rowanswer[3]+rowanswer[4]
         if key in abundance.keys():
             rowanswer.extend(abundance[key])
         else:
             for something in replicatename:
                 rowanswer.append(0)
+        rowanswer.append("")
+        if mapmap in aminomap.keys():
+            rowanswer.extend(aminomap[mapmap])
         cellwriter.writerow(rowanswer)  
