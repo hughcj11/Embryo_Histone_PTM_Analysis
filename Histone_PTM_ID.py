@@ -85,17 +85,18 @@ with open(base_path+"EmbryohPTMs_Unimod.csv") as csvfile:
             last_amino=amino
             if should_count:
                 mod_pos=mod_pos+1
-            #The below code is making a dictionary for each histon+amino acid+position that will have an associated replicates value. 
-            #/this dictionary and its replicates will be referenced later to determine total possible abundance of hPTMs.       
-                mapmap=row[1]+str(mod_pos+int(row[5]))+amino
-                if mapmap in aminomap.keys():
-                    mapvalue=[] 
-                    ziplist=zip(aminomap[mapmap],map(float,replicates))
-                    for groupedreps in ziplist:
-                        mapvalue.append(sum(groupedreps))  
-                    aminomap[mapmap]=mapvalue
-                else:
-                    aminomap[mapmap]=list(map(float,replicates))       
+                #The below code is making a dictionary for each histon+amino acid+position that will have an associated replicates value. 
+                #/this dictionary and its replicates will be referenced later to determine total possible abundance of hPTMs.       
+                if amino!=")":
+                    mapmap=row[1]+str(mod_pos+int(row[5]))+amino
+                    if mapmap in aminomap.keys():
+                        mapvalue=[] 
+                        ziplist=zip(aminomap[mapmap],map(float,replicates))
+                        for groupedreps in ziplist:
+                            mapvalue.append(sum(groupedreps))  
+                        aminomap[mapmap]=mapvalue
+                    else:
+                        aminomap[mapmap]=list(map(float,replicates))       
         answers.append(answer)
 #The code below is transferring the information above into the first intermediate csv file (IntermediatePTMSheet). This intermediate sheet pulls out all the modifications on each peptide 
 with open(base_path+'IntermediatePTMSheet.csv', 'w') as csvfile:
@@ -225,3 +226,34 @@ with open(base_path+'Replicate calculations.csv', 'w') as csvfile:
         if mapmap in aminomap.keys():
             rowanswer.extend(aminomap[mapmap])
         cellwriter.writerow(rowanswer)  
+#The below document is a version of the biologically relevant HistonePTMLibrary with the relative abundance calculated for each PTM type across the total possible residues
+with open(base_path+'Replicate calculations Total PTMs.csv', 'w') as csvfile:
+    cellwriter = csv.writer(csvfile, delimiter=',')
+    cellwriter.writerow(["Unimod"]+replicatename+[""]+replicatename)
+    PTMtotalpos={}
+    PTMtotal={}
+    for rowanswer in biorellist:
+        key=rowanswer[1]+rowanswer[3]+rowanswer[4]+rowanswer[6]
+        mapmap=rowanswer[1]+rowanswer[3]+rowanswer[4]
+        PTMkey=rowanswer[7]
+        PTMsums=[]
+        PTMtotalsums=[]
+        if key in abundance.keys():
+            if PTMkey in PTMtotal.keys():
+                ziplist=zip(PTMtotal[PTMkey],abundance[key])
+                for eachrow in ziplist:
+                    PTMsums.append(sum(eachrow))
+                PTMtotal[PTMkey]=PTMsums
+            else: 
+                PTMtotal[PTMkey]=abundance[key]
+        if mapmap in aminomap.keys():
+            if PTMkey in PTMtotalpos.keys():
+                ziplist=zip(PTMtotalpos[PTMkey],aminomap[mapmap])
+                for eachrow in ziplist:
+                    PTMtotalsums.append(sum(eachrow))
+                PTMtotalpos[PTMkey]=PTMtotalsums
+            else: 
+                PTMtotalpos[PTMkey]=aminomap[mapmap]
+    for PTManswers in PTMtotal.keys():
+        cellwriter.writerow([PTManswers]+PTMtotal[PTManswers]+[""]+PTMtotalpos[PTManswers])
+       
