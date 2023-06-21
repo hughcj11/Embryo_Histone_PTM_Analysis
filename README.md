@@ -10,20 +10,22 @@ Additionally, this code will require a reference library of Unimod IDs and their
 
 
 
-The following code will generate the following 7 documents using the Skyline csv file: IntermediateSheet, IntermediateSheet2, HistonePTMLibrary, BioRelevantHistonePTMLibrary, UniqueHistoneLibrary, UniqueUnimodLibrary, and Replicate calculations.
+The following code will generate the following 8 documents using the Skyline csv file: IntermediateSheet, IntermediateSheet2, HistonePTMLibrary, BioRelevantHistonePTMLibrary, UniqueHistoneLibrary, UniqueUnimodLibrary, Replicate calculations, and Replicate calculations Total PTMs.
     
     IntermediatePTMSheet: pulls out all the modifications on each peptide
     
-    IntermediatePTMSheet2: will  produce hPTM IDs
+    IntermediatePTMSheet2: will produce hPTM IDs
 
-    UniqueUnimodLibrary: identifies unique unimods+residue found in the dataset. This document can be used to manually update the reference list of hPTMS and their biological relevance. This is not used in any calculations and is only meant to be a aid.
+    UniqueUnimodLibrary: identifies unique unimods+residue found in the dataset. This document can be used to manually update the reference list of hPTMS and their biological relevance. This is not used in any calculations and is only meant to be an aid.
 
     HistonePTMLibrary: provides a list of unique modifications found in the data, both biologically relevant and not
 
-    BioRelevantHistonePTMLibrary: provides a list of ONLY biologically relevant unique modifications found in the data
+    BioRelevantHistonePTMLibrary: provides a list of ONLY biologically relevant/unspecified unique modifications found in the data
 
     UniqueHistoneLibrary: provides a list of unique histones found in the data
 
     Replicate calculations: provides a biologically relevant HistonePTMLibrary with the relative abundance calculated for each PTM type and histone location for each replicate. This will calculate the "Sample X Modified" (the sum of the normalized area from all histone peptides containing the given histone PTM) and "Sample X All values" (the sum of the normalized area from all histone peptides that contained the amino acid residue, regardless of its modification status, where the given histone PTM was detected). These will be used to calculate the "Sample X beta value" in the Excel workbook.
+
+    Replicate calculations Total PTMs:provides a biologically relevant HistonePTMLibrary with the relative abundance calculated for each PTM type regardless of histone location/residue for each replicate.
 
 The file downloaded from Skyline should be copied and pasted into the first sheet of the Excel Calculations Workbook. The "Replicate calculations" sheet should be copied onto the second sheet of the Excel Calculations Workbook.
