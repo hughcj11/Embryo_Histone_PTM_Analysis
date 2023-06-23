@@ -1,3 +1,4 @@
+#Author: Chelsea Hughes
 import csv
 import re
 base_path = "/Users/chelseahughes/Desktop/Histone Analysis/code/Embryo Library/"
@@ -227,7 +228,7 @@ with open(base_path+'Replicate calculations.csv', 'w') as csvfile:
             rowanswer.extend(aminomap[mapmap])
         cellwriter.writerow(rowanswer)  
 #The below document is a version of the biologically relevant HistonePTMLibrary with the relative abundance calculated for each PTM type across the total possible residues
-with open(base_path+'Replicate calculations Total PTMs.csv', 'w') as csvfile:
+with open(base_path+'Replicate_calculations_Total_PTMs.csv', 'w') as csvfile:
     cellwriter = csv.writer(csvfile, delimiter=',')
     cellwriter.writerow(["Unimod"]+replicatename+[""]+replicatename)
     PTMtotalpos={}

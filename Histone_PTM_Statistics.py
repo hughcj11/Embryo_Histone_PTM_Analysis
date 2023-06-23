@@ -1,3 +1,4 @@
+#Author: Chelsea Hughes
 import csv
 import re
 import numpy as np

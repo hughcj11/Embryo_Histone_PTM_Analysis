@@ -1,7 +1,7 @@
 # Histone_PTM_Analysis
 https://github.com/hughcj11/Histone_PTM_Analysis
 
-The following code works on a csv file downloaded from Skyline, which should contain the following information in this order: Peptide, Protein, Protein Description, Unimod Accession, Peptide Modified Sequence, Begin Pos, End Pos, Average Measured Retention Time, and the Normalized Area of each Replicate. If Skyline is listing replicates one by one in a row instead of columns, check the "Pivot Replicates" button. It is critical that the csv file is ordered this way so that the code reads the correct columns.
+The following code (Histone_PTM_ID) works on a csv file downloaded from Skyline, which should contain the following information in this order: Peptide, Protein, Protein Description, Unimod Accession, Peptide Modified Sequence, Begin Pos, End Pos, Average Measured Retention Time, and the Normalized Area of each Replicate. If Skyline is listing replicates one by one in a row instead of columns, check the "Pivot Replicates" button. It is critical that the csv file is ordered this way so that the code reads the correct columns.
     *Note: For this code to work, the Skyline output for Unimod Accession should contain only the peptide sequence and the unimod in (). Any mass shifts that do not have Unimod IDs are displayed in [] and will be removed at this time. This is necessary so that the code can correctly count the residues. To account for these mass shifts without unimod IDs, additional code will need to be written in this file.
 To run your specific file, you must first update the base path so that the code can locate your specific data file. Once the base path is updated, all files generated will appear in the same folder as your Skyline data.
 
@@ -29,3 +29,7 @@ The following code will generate the following 8 documents using the Skyline csv
     Replicate calculations Total PTMs:provides a biologically relevant HistonePTMLibrary with the relative abundance calculated for each PTM type regardless of histone location/residue for each replicate.
 
 The file downloaded from Skyline should be copied and pasted into the first sheet of the Excel Calculations Workbook. The "Replicate calculations" sheet should be copied onto the second sheet of the Excel Calculations Workbook.
+
+The code Histone_PTM_Statistics performs stastistics on the unique hPTMS and the global hPTM changes.
+
+The code Embryo hPTM R code is used in R to generate abundance maps/PCA plot.
