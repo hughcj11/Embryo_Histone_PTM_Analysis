@@ -1,0 +1,348 @@
+
+R version 4.2.3 (2023-03-15) -- "Shortstop Beagle"
+Copyright (C) 2023 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin17.0 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[R.app GUI 1.79 (8198) x86_64-apple-darwin17.0]
+
+[Workspace restored from /Users/chelseahughes/.RData]
+[History restored from /Users/chelseahughes/.Rapp.history]
+
+#This code was adapted from the following: https://github.com/emojica2/Histone_PTM_Quantification_Pipeline/blob/main/code/Tilapia_Tissue_Analysis.Rmd
+# Loading Libraries
+
+library(tidyverse)
+library(ggplot2)
+library(rstatix)
+library(ggpubr)
+library(magrittr)
+library(pals)
+library(qvalue)
+library(ggrepel)
+library(EnhancedVolcano)
+library(DT)
+library(ggsignif)
+library(cowplot)
+library(cluster)
+library(factoextra)
+library(stringr)
+
+
+
+# Importing Data
+
+
+# Loading the data
+
+imported_beta_values <- read_csv("/Users/chelseahughes/Desktop/Histone Analysis/Calculation for Embryo Samples/Full_Beta_Values.csv")
+imported_relative_abundance <- read_csv("/Users/chelseahughes/Desktop/Histone Analysis/Calculation for Embryo Samples/Full_Relative_Abundance.csv")
+imported_M_values <- read_csv("/Users/chelseahughes/Desktop/Histone Analysis/Calculation for Embryo Samples/Full_M_Values.csv")
+meta_data <- read_csv("/Users/chelseahughes/Desktop/Histone Analysis/Calculation for Embryo Samples/Meta Data.csv")
+# Checking that the structure of the imported files is correct. All beta values and relative abundance values should be reported as "numeric" rather than "character"
+
+str(imported_beta_values)
+str(imported_relative_abundance)
+
+# Correcting the values that came back as "character" or "numeric" instead of "factor"
+
+imported_beta_values$`Protein Accession` <- as.factor(imported_beta_values$`Protein Accession`)
+imported_beta_values$`Protein Description` <- as.factor(imported_beta_values$`Protein Description`)
+imported_beta_values$Position <- as.factor(imported_beta_values$Position)
+imported_beta_values$`Amino Acid` <- as.factor(imported_beta_values$`Amino Acid`)
+imported_beta_values$`Amino Acid + Position` <- as.factor(imported_beta_values$`Amino Acid + Position`)
+imported_beta_values$`Unimod Accession` <- as.factor(imported_beta_values$`Unimod Accession`)
+imported_beta_values$`PTM Description` <- as.factor(imported_beta_values$`PTM Description`)
+imported_beta_values$`Biologically Relevant` <- as.factor(imported_beta_values$`Biologically Relevant`)
+
+imported_relative_abundance$`Protein Accession` <- as.factor(imported_beta_values$`Protein Accession`)
+imported_relative_abundance$`Protein Description` <- as.factor(imported_beta_values$`Protein Description`)
+imported_relative_abundance$Position <- as.factor(imported_beta_values$Position)
+imported_relative_abundance$`Amino Acid` <- as.factor(imported_beta_values$`Amino Acid`)
+imported_relative_abundance$`Amino Acid + Position` <- as.factor(imported_beta_values$`Amino Acid + Position`)
+imported_relative_abundance$`Unimod Accession` <- as.factor(imported_beta_values$`Unimod Accession`)
+imported_relative_abundance$`PTM Description` <- as.factor(imported_beta_values$`PTM Description`)
+imported_relative_abundance$`Biologically Relevant` <- as.factor(imported_beta_values$`Biologically Relevant`)
+
+
+# Creating Color Palettes
+# Full color palettes
+
+colors24 <- c("#990f26","#b33e52","#cc7a88","#e6b8bf","#99600f","#b3823e","#ccaa7a","#e6d2b8","#54990f","#78b33e","#a3cc7a","#cfe6b8","#0f8299","#3e9fb3","#7abecc","#b8dee6","#653eb3","#967acc","#c7b8e6","#333333","#666666","#999999","#cccccc")
+colors18 <- c("#650111", "#bb2b43", "#de8998", "#795015", "#cd7801", "#eebd78", "#035c00", "#57ae01", "#b4e683", "#082674", "#409fb3", "#bbfff6", "#c55ebc", "#d9b1ee", "#891989","#dedede", "#999999", "#343434" )
+colors18_2 <- c("#670571", "#d29eef", "#6799cc", "#6cc2b2", "#211259", "#127834", "#999934", "#eadc96", "#ff4e01", "#d38010", "#795d4a", "#dc96a2", "#aa4599", "#ac0d5e", "#6f0802", "#888888", "#d9d9d9", "#0a0512")
+
+# Colors for PCA, volcano plots, and pie chart
+
+colors3 <- c("#b33e52", "#78b33e", "#3e9fb3")
+colors18_3 <- colors18[c(8,11,15)]
+colors7 <- c("#54990f", "#a3cc7a", "#0f8299", "#7abecc", "#990f26", "#cc7a88", "#653eb3")
+colors_volcano <- colors18[c(2,11,8,17)]
+
+# Color palettes for individual histone protein maps
+
+
+# Reconfiguring the Data
+
+# Making the imported data frames in the "tall" format rather than the "wide" format.
+
+Data_Beta_Values <- pivot_longer(data = imported_beta_values, cols = meta_data$Sample, names_to = "Sample", values_to = "Beta_Value")
+
+Data_Relative_Abundance <- pivot_longer(data = imported_relative_abundance, cols = meta_data$Sample, names_to = "Sample", values_to = "Relative_Abundance")
+
+# Creating a new data frame called "Data", which includes beta values, relative abundance, and M values for each histone PTM
+
+Data <- Data_Beta_Values %>% 
+  mutate(Relative_Abundance = Data_Relative_Abundance$Relative_Abundance) %>% 
+  mutate(MValue = log2((Data_Beta_Values$Beta_Value)/(1 - Data_Beta_Values$Beta_Value)))
+
+# Fixing the structure of the "Data" data frame.
+
+Data$Sample <- as.factor(Data$Sample)
+
+# Adding information from the meta_data file to the Data file (i.e., Tissue, Treatment, Experiment)
+
+Data <- left_join(Data, meta_data, by = "Sample")
+
+
+# Reconfiguring the Data
+
+
+# Making the imported data frames in the "tall" format rather than the "wide" format.
+
+Data_Beta_Values <- pivot_longer(data = imported_beta_values, cols = meta_data$Sample, names_to = "Sample", values_to = "Beta_Value")
+
+Data_Relative_Abundance <- pivot_longer(data = imported_relative_abundance, cols = meta_data$Sample, names_to = "Sample", values_to = "Relative_Abundance")
+
+# Creating a new data frame called "Data", which includes beta values, relative abundance, and M values for each histone PTM
+
+Data <- Data_Beta_Values %>% 
+  mutate(Relative_Abundance = Data_Relative_Abundance$Relative_Abundance) %>% 
+  mutate(MValue = log2((Data_Beta_Values$Beta_Value)/(1 - Data_Beta_Values$Beta_Value)))
+
+# Fixing the structure of the "Data" data frame.
+
+Data$Sample <- as.factor(Data$Sample)
+
+# Adding information from the meta_data file to the Data file (i.e., Tissue, Treatment, Experiment)
+
+Data <- left_join(Data, meta_data, by = "Sample")
+
+# Adding a column histone PTM name (i.e., "hPTM_Name")
+
+Data <- Data %>% 
+  mutate(hPTM_Name = paste(Data$`Protein Accession`, Data$`Protein Description`, Data$`Amino Acid + Position`, Data$`PTM Description`))
+
+Data <- Data %>% 
+  mutate(Global_Name = paste(Data$`Protein Accession`, Data$`PTM Description`))
+
+# Fixing the structure of three columns
+
+Data$Beta_Value <- as.numeric(Data$Beta_Value)
+Data$Relative_Abundance <- as.numeric(Data$Relative_Abundance)
+Data$MValue <- as.numeric(Data$MValue)
+
+
+# Exporting the data
+
+# write_csv(Data, file = "../data/Full_Histone_PTM_Quantification/Full_Data.csv")
+
+
+# Subsetting the Data 
+
+
+Exp_Data_Anoxic <- Data %>% 
+  filter(Condition == "Anoxic")
+
+Exp_Data_Normoxic <- Data %>% 
+  filter(Condition == "Normoxic")
+
+
+
+#Extracting list of PTMs (PTM description)
+
+List_PTMs <- as.data.frame(unique(Data$`PTM Description`))
+List_PTMs
+
+
+#Renaming PTMs in the data frame by their common name
+
+rep_str = c('GlyGly' = 'Ubiquityl')
+
+Data$`PTM Description` <- str_replace_all(Data$`PTM Description`, rep_str) 
+
+
+# Individual Accession - Histone PTM Maps
+## H2A.V (XP_013854970.1)
+## H1-like (XP_013855658.1)
+## H2B_1/2-like (XP_013857090.1)
+## H2A.Z (XP_013858796.1)
+## H2A (XP_013874651.1)
+## H2A-like (XP_013878193.1)
+## H1-like (XP_013878240.1)
+## H2A-like (XP_013879560.1)
+## H2B_1/2 (XP_013879561.1)
+## H1-like (XP_013879563.1)
+## H3-like (XP_013879564.1)
+## H2B.L4-like (XP_013885354.1)
+## H3.3 (XP_013887037.1)
+## H2AX-like (XP_013887205.1)
+
+#H1
+## H1-like (XP_013879563.1)
+## H1-like (XP_013878240.1)
+## H1-like (XP_013855658.1)
+
+#H2A
+## H2AX-like (XP_013887205.1)
+## H2A-like (XP_013879560.1)
+## H2A-like (XP_013878193.1)
+## H2A (XP_013874651.1)
+## H2A.Z (XP_013858796.1)
+## H2A.V (XP_013854970.1)
+
+#H2B
+## H2B.L4-like (XP_013885354.1)
+## H2B_1/2 (XP_013879561.1)
+## H2B_1/2-like (XP_013857090.1)
+
+#H3
+## H3.3 (XP_013887037.1)
+## H3-like (XP_013879564.1)
+
+#Extracting list of all histone proteins in the data frame
+
+unique(Data$`Protein Description`)
+
+
+
+
+
+#Making hPTM maps for each histone
+
+colors_H1 <- colors18[c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18)]my_histone <- Data[c(1:2)]##my_histone <- unique(my_histone)my_histone_xp <- (unique(my_histone[, c(1,2)]))i=2for (i in 1:length(my_histone_xp$`Protein Accession`)){                     H1_Maps <- Data %>%                      filter(`Protein Accession` == my_histone_xp$`Protein Accession`[i]) %>%                      arrange(Position) %>%                      mutate(abbreviation = case_when(Condition == "Anoxic" ~ "A", Condition == "Normoxic" ~ "N"))                                                                                               Detail_H1_Maps <- H1_Maps[ , c(14, 1:8)]                                      Summary_H1_Maps <- H1_Maps %>%                      group_by(abbreviation, hPTM_Name) %>%                      summarize(mean_Relative_Abundance = mean(Relative_Abundance))                                      Full_H1_Maps <- left_join(Summary_H1_Maps, Detail_H1_Maps, by = "hPTM_Name")                   Full_H1_Maps <- Full_H1_Maps[!duplicated(Full_H1_Maps), ]                                                         Full_H1_Maps <- Full_H1_Maps %>%                      arrange(Position)                                      order <- unique(Full_H1_Maps$`Amino Acid + Position`)                                      Full_H1_Maps$`Amino Acid + Position` <- factor(Full_H1_Maps$`Amino Acid + Position`, levels= order )                                                        Unique_title <- paste(as.character(my_histone_xp$`Protein Accession`[i]), as.character(my_histone_xp$`Protein Description`[i]), sep=" ")                                                                  H1_map <- ggplot(Full_H1_Maps, aes(fill = `PTM Description`, y = mean_Relative_Abundance, x = abbreviation)) +                     geom_bar(position = "stack", stat = "identity") +                     facet_wrap(~ `Amino Acid + Position`, scales = "free", ncol = 6) +                     ggtitle(Unique_title) +                     xlab("Condition") +                     ylab("Average Relative \nAbundance (%)") +                     scale_fill_manual(values = colors_H1) +                     theme_bw() +                     theme(plot.title = element_text(color = "black", size = 12, face = "bold")) +                     theme(strip.text.x = element_text(size = 10))                    print(H1_map)
+} 
+
+
+
+
+
+
+
+colors_H1 <- colors18[c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19)]
+Global_Maps <- read_csv("/Users/chelseahughes/Desktop/Histone Analysis/Calculation for Embryo Samples/Embryo Anoxia Total PTM.csv")
+Global_Maps_Pivoted <- pivot_longer(data = Global_Maps, cols = meta_data$Sample, names_to = "Sample", values_to = "Relative_Abundance")
+Global_Maps_Pivoted <- left_join(Global_Maps_Pivoted, meta_data, by = "Sample")
+
+Full_Global_Maps <- Global_Maps_Pivoted %>%                      group_by(Condition, 'Unimod Accession'=Global_Maps_Pivoted$'Unimod Accession') %>%                      summarize(mean_Relative_Abundance = mean(Relative_Abundance))ggplot(data = Full_Global_Maps2, aes(x = `Unimod Accession`, y = Anoxic, fill=Normoxic)) +
+facet_grid(. ~`Unimod Accession`)+    geom_bar(stat = "identity", position = position_dodge(), alpha = 0.75)  +    geom_text(aes(label = Anoxic), fontface = "bold", vjust = 1.5,              position = position_dodge(.9), size = 4) +    labs(x = "\n Coin Flip Outcome", y = "Frequency\n", title = "\n Coin Flip Results \n") +    theme(plot.title = element_text(hjust = 0.5),           axis.title.x = element_text(face="bold", colour="red", size = 12),          axis.title.y = element_text(face="bold", colour="red", size = 12),          legend.title = element_text(face="bold", size = 10))
+
+Full_Global_Maps2 <- Full_Global_Maps %>% +     pivot_wider(names_from ='Condition', values_from = 'mean_Relative_Abundance') > View(Full_Global_Maps2)> View(Full_Global_Maps2)                   
+UnimodAccess<-Full_Global_Maps$'Unimod Accession' 
+meanRelative<-Full_Global_Maps$'mean_Relative_Abundance'
+Condition<-Full_Global_Maps$'Condition'
+barplot(Full_Global_Maps,        main='Condition,        xlab='meanRelative',        ylab='UnimodAccess',        border="red",        col="blue",        density=10)
+
+
+
+
+
+
+Global_map <- ggplot(Full_Global_Maps, aes(fill = Full_Global_Maps$'Unimod Accession', y = mean_Relative_Abundance, x = Condition)) +
+  geom_bar(position = "stack", stat = "identity") +
+ facet_wrap(~ 'Unimod Accession', scales = "free", ncol = 6) +
+  ggtitle("Global hPTM Abundance") +
+  xlab("Condition") +
+  ylab("Average Relative \nAbundance (%)") +
+labs(fill="PTM")+
+  scale_fill_manual(values = colors_H1) +
+  theme_bw() +
+  theme(plot.title = element_text(color = "black", size = 12, face = "bold")) +
+  theme(strip.text.x = element_text(size = 10))
+
+print(Global_map)
+
+
+
+
+
+
+
+
+## PCA - Comparing Conditions Using M Values
+MValues <- imported_M_values  
+
+
+MValues <- MValues %>% 
+  mutate(hPTM_Name = paste(MValues$`Protein Description`, MValues$`Amino Acid + Position`, MValues$`PTM Description`))
+
+MValues <- MValues[,c(21,9:20)]
+
+Transposed_MValues <- as.data.frame(t(MValues))
+
+write_csv(Transposed_MValues, file = "/Users/chelseahughes/Desktop/Histone Analysis/Calculation for Embryo Samples/Transposed_MValues1.csv")
+
+#At this point, Transposed_MValues2 needs to be manually made from Transposed_MValues1. All you need to do is add a "Sample" Column
+
+PCA_Data1 <- read_csv("/Users/chelseahughes/Desktop/Histone Analysis/Calculation for Embryo Samples/Transposed_MValues2.csv")
+
+PCA_Data1 <- left_join(meta_data, PCA_Data1, by = "Sample")
+PCA_Data1$Condition <- as.factor(PCA_Data1$Condition)
+ 
+which(apply(PCA_Data1, 2, var)==0)
+PCA_Data2 <- PCA_Data1[ , which(apply(PCA_Data1, 2, var) != 0)]
+
+PCA_Data2 <- lapply(PCA_Data2, as.numeric)
+PCA_Data2 <- as.data.frame(PCA_Data2)
+
+PCA <- prcomp(PCA_Data2, scale = TRUE)
+PCA
+summary(PCA)
+plot(PCA, type = "l")
+biplot(PCA, scale = 0)
+
+# EXTRACTING PC SCORES
+str(PCA)
+PCA$x
+Plotting_PCA <- cbind(PCA_Data1, PCA$x[,1:2])
+head(Plotting_PCA)
+
+# SCREE PLOT
+pca.var <- PCA$sdev^2
+pca.var.per <- round(pca.var/sum(pca.var)*100, 1)
+barplot(pca.var.per, main="Scree Plot", xlab="Principal Component", ylab="Percent Variation")
+
+PCA_Plot <- ggplot(Plotting_PCA, aes(PC1, PC2, col = Condition, fill = Condition)) +
+  stat_ellipse(geom = "polygon", col = "black", alpha = 0.3) +
+  geom_point(shape = 21, col = "black") +
+  xlab(paste("PC1 - ", pca.var.per[1], "%", sep = "")) +
+  ylab(paste("PC2 - ", pca.var.per[2], "%", sep = "")) +
+  theme_bw() +
+  scale_fill_manual(values = colors18_3)
+
+print(PCA_Plot)
+
+
+
+
+
+
+
+
+
+
+
+
