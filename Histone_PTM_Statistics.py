@@ -41,7 +41,7 @@ datastats.to_csv(base_path+'/MMMM.csv', index=False)
 data = read_csv("/Users/chelseahughes/Desktop/Histone Analysis/code/Embryo Library/Replicate_calculations_Total_PTMs.csv",header=0)
 datastats= data.iloc[:,0:1]
 sample=[f"Sample {i+1}" for i in range(0,12)]
-datastats[sample]= data.iloc[:,1:13].to_numpy()/(data.iloc[:,14:26]*100).to_numpy()
+datastats[sample]= (data.iloc[:,1:13].to_numpy()/(data.iloc[:,14:26])*100).to_numpy()
 datastats=datastats.replace(-np.inf, 0)
 datastats.to_csv(base_path+'/GlobalA.csv', index=False)
 # Eventually change to Embryo Anoxia Total PTM.csv
