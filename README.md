@@ -35,6 +35,8 @@ The code Histone_PTM_Statistics takes the place of the Excel Calculations workbo
 
     Full_beta_values: generates the beta value in a csv file.
 
+    Embryo Anoxia Total PTM: generates the global relative abundances of each hPTM (independent of residue and histone). 
+
     Datastats: statistics on the relative abundance data for each unique hPTM (residue,PTM,and histone).
 
     DatastatsGlobal: statistics on the relative abundance data global hPTM changes (independent of residue and histone)
