@@ -32,9 +32,9 @@ datastats.to_csv(base_path+'/Full_beta_values.csv', index=False)
 data = read_csv("/Users/chelseahughes/Desktop/Histone Analysis/code/Embryo Library/Replicate calculations.csv",header=0)
 datastats= data.iloc[:,0:8]
 sample=[f"Sample {i+1}" for i in range(0,12)]
-datastats[sample]=np.log2(data.iloc[:,9:21].to_numpy()/((data.iloc[:,22:34]+100).to_numpy()))/(1-(data.iloc[:,9:21].to_numpy()/((data.iloc[:,22:34]+100).to_numpy())))
+datastats[sample]=np.log2((data.iloc[:,9:21].to_numpy()/((data.iloc[:,22:34]+100).to_numpy()))/(1-(data.iloc[:,9:21].to_numpy()/((data.iloc[:,22:34]+100).to_numpy()))))
 datastats=datastats.replace(-np.inf, 0)
-datastats.to_csv(base_path+'/MMMM.csv', index=False)
+datastats.to_csv(base_path+'/Full_M_Values.csv', index=False)
 
 ##Global calculations
 #The below code generates the global relative abundance value in a csv file

@@ -29,11 +29,13 @@ The following code will generate the following 8 documents using the Skyline csv
     Replicate calculations Total PTMs:provides a biologically relevant HistonePTMLibrary with the relative abundance calculated for each PTM type regardless of histone location/residue for each replicate.
 
 
-The code Histone_PTM_Statistics takes the place of the Excel Calculations workbook by calculating the relative abuandance, beta value, and m values of each hPTM.Additionally, this code performs stastistics on the unique hPTMS and the global hPTM changes. The following csv files are generated:
+The code Histone_PTM_Statistics takes the place of the Excel Calculations workbook by calculating the relative abuandance, beta value, and m values of each hPTM.Additionally, this code performs stastistics on the unique hPTMS and the global hPTM changes. The following 6 csv files are generated:
 
     Full_Relative_Abundance: generates the relative abundance value in a csv file.
 
     Full_beta_values: generates the beta value in a csv file.
+
+    Full_M_Values: generates the m value in a csv file.
 
     Embryo Anoxia Total PTM: generates the global relative abundances of each hPTM (independent of residue and histone). 
 
