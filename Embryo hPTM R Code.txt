@@ -64,18 +64,18 @@ imported_beta_values$`Protein Description` <- as.factor(imported_beta_values$`Pr
 imported_beta_values$Position <- as.factor(imported_beta_values$Position)
 imported_beta_values$`Amino Acid` <- as.factor(imported_beta_values$`Amino Acid`)
 imported_beta_values$`Amino Acid + Position` <- as.factor(imported_beta_values$`Amino Acid + Position`)
-imported_beta_values$`Unimod Accession` <- as.factor(imported_beta_values$`Unimod Accession`)
+imported_beta_values$`Unimod Accession ` <- as.factor(imported_beta_values$`Unimod`)
 imported_beta_values$`PTM Description` <- as.factor(imported_beta_values$`PTM Description`)
-imported_beta_values$`Biologically Relevant` <- as.factor(imported_beta_values$`Biologically Relevant`)
+#imported_beta_values$`Biologically Relevant` <- as.factor(imported_beta_values$`Biologically Relevant`)
 
 imported_relative_abundance$`Protein Accession` <- as.factor(imported_beta_values$`Protein Accession`)
 imported_relative_abundance$`Protein Description` <- as.factor(imported_beta_values$`Protein Description`)
 imported_relative_abundance$Position <- as.factor(imported_beta_values$Position)
 imported_relative_abundance$`Amino Acid` <- as.factor(imported_beta_values$`Amino Acid`)
 imported_relative_abundance$`Amino Acid + Position` <- as.factor(imported_beta_values$`Amino Acid + Position`)
-imported_relative_abundance$`Unimod Accession` <- as.factor(imported_beta_values$`Unimod Accession`)
+imported_relative_abundance$`Unimod Accession` <- as.factor(imported_beta_values$`Unimod`)
 imported_relative_abundance$`PTM Description` <- as.factor(imported_beta_values$`PTM Description`)
-imported_relative_abundance$`Biologically Relevant` <- as.factor(imported_beta_values$`Biologically Relevant`)
+#imported_relative_abundance$`Biologically Relevant` <- as.factor(imported_beta_values$`Biologically Relevant`)
 
 
 # Creating Color Palettes
@@ -137,7 +137,7 @@ Data <- Data_Beta_Values %>%
 
 Data$Sample <- as.factor(Data$Sample)
 
-# Adding information from the meta_data file to the Data file (i.e., Tissue, Treatment, Experiment)
+# Adding information from the meta_data file to the Data file 
 
 Data <- left_join(Data, meta_data, by = "Sample")
 
@@ -233,48 +233,9 @@ unique(Data$`Protein Description`)
 
 #Making hPTM maps for each histone
 
-colors_H1 <- colors18[c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18)]my_histone <- Data[c(1:2)]##my_histone <- unique(my_histone)my_histone_xp <- (unique(my_histone[, c(1,2)]))i=2for (i in 1:length(my_histone_xp$`Protein Accession`)){                     H1_Maps <- Data %>%                      filter(`Protein Accession` == my_histone_xp$`Protein Accession`[i]) %>%                      arrange(Position) %>%                      mutate(abbreviation = case_when(Condition == "Anoxic" ~ "A", Condition == "Normoxic" ~ "N"))                                                                                               Detail_H1_Maps <- H1_Maps[ , c(14, 1:8)]                                      Summary_H1_Maps <- H1_Maps %>%                      group_by(abbreviation, hPTM_Name) %>%                      summarize(mean_Relative_Abundance = mean(Relative_Abundance))                                      Full_H1_Maps <- left_join(Summary_H1_Maps, Detail_H1_Maps, by = "hPTM_Name")                   Full_H1_Maps <- Full_H1_Maps[!duplicated(Full_H1_Maps), ]                                                         Full_H1_Maps <- Full_H1_Maps %>%                      arrange(Position)                                      order <- unique(Full_H1_Maps$`Amino Acid + Position`)                                      Full_H1_Maps$`Amino Acid + Position` <- factor(Full_H1_Maps$`Amino Acid + Position`, levels= order )                                                        Unique_title <- paste(as.character(my_histone_xp$`Protein Accession`[i]), as.character(my_histone_xp$`Protein Description`[i]), sep=" ")                                                                  H1_map <- ggplot(Full_H1_Maps, aes(fill = `PTM Description`, y = mean_Relative_Abundance, x = abbreviation)) +                     geom_bar(position = "stack", stat = "identity") +                     facet_wrap(~ `Amino Acid + Position`, scales = "free", ncol = 6) +                     ggtitle(Unique_title) +                     xlab("Condition") +                     ylab("Average Relative \nAbundance (%)") +                     scale_fill_manual(values = colors_H1) +                     theme_bw() +                     theme(plot.title = element_text(color = "black", size = 12, face = "bold")) +                     theme(strip.text.x = element_text(size = 10))                    print(H1_map)
+colors_H1 <- colors18[c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18)]my_histone <- Data[c(2:3)]##my_histone <- unique(my_histone)my_histone_xp <- (unique(my_histone[, c(1,2)]))i=2for (i in 1:length(my_histone_xp$`Protein Accession`)){                     H1_Maps <- Data %>%                      filter(`Protein Accession` == my_histone_xp$`Protein Accession`[i]) %>%                      arrange(Position) %>%                      mutate(abbreviation = case_when(Condition == "Anoxic" ~ "A", Condition == "Normoxic" ~ "N"))                                                                                               #Detail_H1_Maps <- H1_Maps[ , c(14, 1:8)]
+ 		   Detail_H1_Maps <- H1_Maps[ , c(14, 15, 1:8)]                                      Summary_H1_Maps <- H1_Maps %>%                      group_by(abbreviation, Condition, hPTM_Name) %>%                      summarize(mean_Relative_Abundance = mean(Relative_Abundance))                                      Full_H1_Maps <- left_join(Summary_H1_Maps, Detail_H1_Maps, by = c("hPTM_Name","Condition"))                   Full_H1_Maps <- Full_H1_Maps[!duplicated(Full_H1_Maps), ]                                                         Full_H1_Maps <- Full_H1_Maps %>%                      arrange(Position)                                      order <- unique(Full_H1_Maps$`Amino Acid + Position`)                                      Full_H1_Maps$`Amino Acid + Position` <- factor(Full_H1_Maps$`Amino Acid + Position`, levels= order )                                                        Unique_title <- paste(as.character(my_histone_xp$`Protein Accession`[i]), as.character(my_histone_xp$`Protein Description`[i]), sep=" ")                                                                  H1_map <- ggplot(Full_H1_Maps, aes(fill = `PTM Description`, y = mean_Relative_Abundance, x = abbreviation)) +                     geom_bar(position = "stack", stat = "identity") +                     facet_wrap(~ `Amino Acid + Position`, scales = "free", ncol = 6) +                     ggtitle(Unique_title) +                     xlab("Condition") +                     ylab("Average Relative \nAbundance (%)") +                     scale_fill_manual(values = colors_H1) +                     theme_bw() +                     theme(plot.title = element_text(color = "black", size = 12, face = "bold")) +                     theme(strip.text.x = element_text(size = 10))                    print(H1_map)
 } 
-
-
-
-
-
-
-
-colors_H1 <- colors18[c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19)]
-Global_Maps <- read_csv("/Users/chelseahughes/Desktop/Histone Analysis/Calculation for Embryo Samples/Embryo Anoxia Total PTM.csv")
-Global_Maps_Pivoted <- pivot_longer(data = Global_Maps, cols = meta_data$Sample, names_to = "Sample", values_to = "Relative_Abundance")
-Global_Maps_Pivoted <- left_join(Global_Maps_Pivoted, meta_data, by = "Sample")
-
-Full_Global_Maps <- Global_Maps_Pivoted %>%                      group_by(Condition, 'Unimod Accession'=Global_Maps_Pivoted$'Unimod Accession') %>%                      summarize(mean_Relative_Abundance = mean(Relative_Abundance))ggplot(data = Full_Global_Maps2, aes(x = `Unimod Accession`, y = Anoxic, fill=Normoxic)) +
-facet_grid(. ~`Unimod Accession`)+    geom_bar(stat = "identity", position = position_dodge(), alpha = 0.75)  +    geom_text(aes(label = Anoxic), fontface = "bold", vjust = 1.5,              position = position_dodge(.9), size = 4) +    labs(x = "\n Coin Flip Outcome", y = "Frequency\n", title = "\n Coin Flip Results \n") +    theme(plot.title = element_text(hjust = 0.5),           axis.title.x = element_text(face="bold", colour="red", size = 12),          axis.title.y = element_text(face="bold", colour="red", size = 12),          legend.title = element_text(face="bold", size = 10))
-
-Full_Global_Maps2 <- Full_Global_Maps %>% +     pivot_wider(names_from ='Condition', values_from = 'mean_Relative_Abundance') > View(Full_Global_Maps2)> View(Full_Global_Maps2)                   
-UnimodAccess<-Full_Global_Maps$'Unimod Accession' 
-meanRelative<-Full_Global_Maps$'mean_Relative_Abundance'
-Condition<-Full_Global_Maps$'Condition'
-barplot(Full_Global_Maps,        main='Condition,        xlab='meanRelative',        ylab='UnimodAccess',        border="red",        col="blue",        density=10)
-
-
-
-
-
-
-Global_map <- ggplot(Full_Global_Maps, aes(fill = Full_Global_Maps$'Unimod Accession', y = mean_Relative_Abundance, x = Condition)) +
-  geom_bar(position = "stack", stat = "identity") +
- facet_wrap(~ 'Unimod Accession', scales = "free", ncol = 6) +
-  ggtitle("Global hPTM Abundance") +
-  xlab("Condition") +
-  ylab("Average Relative \nAbundance (%)") +
-labs(fill="PTM")+
-  scale_fill_manual(values = colors_H1) +
-  theme_bw() +
-  theme(plot.title = element_text(color = "black", size = 12, face = "bold")) +
-  theme(strip.text.x = element_text(size = 10))
-
-print(Global_map)
-
 
 
 
