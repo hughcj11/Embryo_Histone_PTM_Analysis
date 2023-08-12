@@ -24,6 +24,8 @@ The following code will generate the following 8 documents using the Skyline csv
 
     UniqueHistoneLibrary: provides a list of unique histones found in the data
 
+    UniqueResidueLibrary:provides a list of the unique residues that were modified
+
     Replicate calculations: provides a biologically relevant HistonePTMLibrary with the relative abundance calculated for each PTM type and histone location for each replicate. This will calculate the "Sample X Modified" (the sum of the normalized area from all histone peptides containing the given histone PTM) and "Sample X All values" (the sum of the normalized area from all histone peptides that contained the amino acid residue, regardless of its modification status, where the given histone PTM was detected). These will be used to calculate the "Sample X beta value" in the Excel workbook.
 
     Replicate calculations Total PTMs:provides a biologically relevant HistonePTMLibrary with the relative abundance calculated for each PTM type regardless of histone location/residue for each replicate.
