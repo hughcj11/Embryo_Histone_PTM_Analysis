@@ -1,6 +1,5 @@
 #Author: Chelsea Hughes
 import csv
-import re
 import numpy as np
 from pandas import read_csv
 from scipy.stats import f_oneway
@@ -74,3 +73,16 @@ datastats['T-test_t_statistic'], datastats['T-test_p_value'] = ttest_ind(data.il
 datastats['T-test_p_value'] = datastats['T-test_p_value'].fillna(1)
 datastats['corrected_p_values'] = multipletests(datastats['T-test_p_value'], method='fdr_bh')[1]
 datastats.to_csv(base_path+'/DatastatsGlobal.csv', index=False)
+
+#The below document shows the relative coverage of each modifiable residue (a residue shown as capable of having a PTM). For example, how often K covered by PTMs?
+with open(base_path+'/ResidueCoverage.csv', 'w') as csvfile:
+    cellwriter = csv.writer(csvfile, delimiter=',')
+    cellwriter.writerow(["Amino Acid","Normoxic", "Anoxic"])
+    data = read_csv(base_path+'/Datastats.csv',header=0)
+    AAAnoxic=data.groupby('Amino Acid')['Anoxic_Average'].unique().to_dict()
+    AANormoxic=data.groupby('Amino Acid')['Normoxic_Average'].unique().to_dict()
+    for aakey in AANormoxic:
+        AANormoxicAve=sum(AANormoxic[aakey])/len(AANormoxic[aakey])
+        AAAnoxicAve=sum(AAAnoxic[aakey])/len(AAAnoxic[aakey])
+        cellwriter.writerow([aakey,AANormoxicAve,AAAnoxicAve])
+  
