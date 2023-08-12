@@ -157,8 +157,8 @@ with open(base_path+'HistonePTMLibrary.csv', 'w') as csvfile:
     cellwriter.writerow(["hPTM_ID","Protein Accession","Protein Description","Position","Amino Acid","Amino Acid + Position","Unimod","PTM Description","Biological Relevance"])
     pa=[]
     pd=[]
-    pos=[]
-    aa=[]
+    pos=[] #"Position"
+    aa=[] #"Amino Acid"
     aap=[]
     um=[]
     uniqueunimod=[]
@@ -178,7 +178,7 @@ with open(base_path+'HistonePTMLibrary.csv', 'w') as csvfile:
         if aa[countindex]+um[countindex] in dictionary.keys():
             unimodname=dictionary[aa[countindex]+um[countindex]][0]
             biorelevance=dictionary[aa[countindex]+um[countindex]][1]
-            if biorelevance=="Yes" or biorelevance=="Not specified":
+            if biorelevance=="Yes" or biorelevance=="Multiple":
                 biorellist.append([libraryspace[countindex].replace("$","."),pa[countindex],pd[countindex],pos[countindex],aa[countindex],aap[countindex],um[countindex],unimodname, biorelevance]) 
         else:
             unimodname=""
@@ -188,11 +188,11 @@ with open(base_path+'HistonePTMLibrary.csv', 'w') as csvfile:
 
 
 
-#The below document is a list of the unique histones identified 
+#The below document is a list of the unique histones identified.
 with open(base_path+'UniqueHistoneLibrary.csv', 'w') as csvfile:
     cellwriter = csv.writer(csvfile, delimiter=',')
-    uniquehistone=set(uniquehistone)
-    for uniqueanswer in uniquehistone:
+    pa=set(pa)
+    for uniqueanswer in pa:
         cellwriter.writerow([uniqueanswer])  
 
 
@@ -202,7 +202,15 @@ with open(base_path+'UniqueUnimodLibrary.csv', 'w') as csvfile:
     cellwriter.writerow(["unimod+residue"])
     uniqueunimod=set(uniqueunimod)
     for uniquemod in uniqueunimod:
-        cellwriter.writerow([uniquemod])  
+        cellwriter.writerow([uniquemod])
+
+#The below document is a list of the unique residues that were modified. 
+with open(base_path+'UniqueResidueLibrary.csv', 'w') as csvfile:
+    cellwriter = csv.writer(csvfile, delimiter=',')
+    cellwriter.writerow(["Amino Acid"])
+    aa=set(aa)
+    for uniqueaa in aa:
+        cellwriter.writerow([uniqueaa])  
 
 #The below document is a version of the HistonePTMLibrary with only the biologically relevant modifications included
 with open(base_path+'BioRelevantHistonePTMLibrary.csv', 'w') as csvfile:
@@ -227,7 +235,7 @@ with open(base_path+'Replicate calculations.csv', 'w') as csvfile:
         if mapmap in aminomap.keys():
             rowanswer.extend(aminomap[mapmap])
         cellwriter.writerow(rowanswer)  
-#The below document is a version of the biologically relevant HistonePTMLibrary with the relative abundance calculated for each PTM type across the total possible residues
+#The below document is a version of the biologically relevant HistonePTMLibrary with the relative abundance calculated for each PTM type across the total possible residues (global)
 with open(base_path+'Replicate_calculations_Total_PTMs.csv', 'w') as csvfile:
     cellwriter = csv.writer(csvfile, delimiter=',')
     cellwriter.writerow(["Unimod"]+replicatename+[""]+replicatename)
@@ -257,4 +265,9 @@ with open(base_path+'Replicate_calculations_Total_PTMs.csv', 'w') as csvfile:
                 PTMtotalpos[PTMkey]=aminomap[mapmap]
     for PTManswers in PTMtotal.keys():
         cellwriter.writerow([PTManswers]+PTMtotal[PTManswers]+[""]+PTMtotalpos[PTManswers])
+
+
+#The below document shows the relative coverage of each modifiable residue (a residue shown as capable of having a PTM). For example, how often K covered by PTMs?
+#with open(base_path+'Replicate_calculations_Total_Residue_Coverage.csv', 'w') as csvfile:
+    #cellwriter = csv.writer(csvfile, delimiter=',')
        
