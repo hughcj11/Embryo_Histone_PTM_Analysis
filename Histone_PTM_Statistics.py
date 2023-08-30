@@ -63,13 +63,14 @@ datastats.to_csv(base_path+'/Datastats.csv', index=False)
 
 ##Global statistics
 #The below code performs statistics on the relative abundance data global hPTM changes (independent of residue and histone)
-data = read_csv("/Users/chelseahughes/Desktop/Histone Analysis/Calculation for Embryo Samples/Embryo Anoxia Total PTM.csv",header=0)
+data2 = read_csv("/Users/chelseahughes/Desktop/Histone Analysis/Calculation for Embryo Samples/Embryo Anoxia Total PTM.csv",header=0)
+data = read_csv("/Users/chelseahughes/Desktop/Histone Analysis/code/Embryo Library/Replicate_calculations_Total_PTMs.csv",header=0)
 datastats= data.iloc[:,0:1]
-datastats["Normoxic_Average"]=data.iloc[:,1:7].mean(axis=1)
-datastats["Anoxic_Average"]=data.iloc[:,7:13].mean(axis=1)
+datastats["Normoxic_Average"]=data.iloc[:,1:7].sum(axis=1)/data.iloc[:,14:20].sum(axis=1)
+datastats["Anoxic_Average"]=data.iloc[:,7:13].sum(axis=1)/data.iloc[:,20:27].sum(axis=1)
 datastats['log2FC'] = np.log2(datastats['Anoxic_Average'] / (datastats['Normoxic_Average']+.0000001)) #.0000001 added to remove zeroes
 # datastats['Fvalue'],datastats['Anova_Pvalue'] = f_oneway(data.iloc[:,8:14],data.iloc[:,14:20],axis=1)
-datastats['T-test_t_statistic'], datastats['T-test_p_value'] = ttest_ind(data.iloc[:,1:7], data.iloc[:,7:13],axis=1)
+datastats['T-test_t_statistic'], datastats['T-test_p_value'] = ttest_ind(data2.iloc[:,1:7], data2.iloc[:,7:13],axis=1)
 datastats['T-test_p_value'] = datastats['T-test_p_value'].fillna(1)
 datastats['corrected_p_values'] = multipletests(datastats['T-test_p_value'], method='fdr_bh')[1]
 datastats.to_csv(base_path+'/DatastatsGlobal.csv', index=False)
@@ -85,4 +86,16 @@ with open(base_path+'/ResidueCoverage.csv', 'w') as csvfile:
         AANormoxicAve=sum(AANormoxic[aakey])/len(AANormoxic[aakey])
         AAAnoxicAve=sum(AAAnoxic[aakey])/len(AAAnoxic[aakey])
         cellwriter.writerow([aakey,AANormoxicAve,AAAnoxicAve])
+
+#The below document shows the relative coverage by a specific PTM for each modifiable residue (a residue shown as capable of having a PTM). For example, how often K covered by Ub?
+with open(base_path+'/ResidueCoverageByPTM.csv', 'w') as csvfile:
+    cellwriter = csv.writer(csvfile, delimiter=',')
+    cellwriter.writerow(["Amino Acid", "PTM Description","Normoxic", "Anoxic"])
+    data = read_csv(base_path+'/Datastats.csv',header=0)
+    AAAnoxic=data.groupby(['Amino Acid', "PTM Description"])['Anoxic_Average'].unique().to_dict()
+    AANormoxic=data.groupby(['Amino Acid', "PTM Description"])['Normoxic_Average'].unique().to_dict()
+    for aakey in AANormoxic:
+        AANormoxicAve=sum(AANormoxic[aakey])/len(AANormoxic[aakey])
+        AAAnoxicAve=sum(AAAnoxic[aakey])/len(AAAnoxic[aakey])
+        cellwriter.writerow([aakey[0],aakey[1],AANormoxicAve,AAAnoxicAve])
   

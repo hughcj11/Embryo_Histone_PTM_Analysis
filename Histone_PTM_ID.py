@@ -267,7 +267,5 @@ with open(base_path+'Replicate_calculations_Total_PTMs.csv', 'w') as csvfile:
         cellwriter.writerow([PTManswers]+PTMtotal[PTManswers]+[""]+PTMtotalpos[PTManswers])
 
 
-#The below document shows the relative coverage of each modifiable residue (a residue shown as capable of having a PTM). For example, how often K covered by PTMs?
-#with open(base_path+'Replicate_calculations_Total_Residue_Coverage.csv', 'w') as csvfile:
-    #cellwriter = csv.writer(csvfile, delimiter=',')
+
        
