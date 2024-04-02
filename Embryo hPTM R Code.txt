@@ -41,7 +41,7 @@ library(cluster)
 library(factoextra)
 library(stringr)
 library(ggforce)
-
+library (data.table)
 
 
 # Importing Data
@@ -305,4 +305,45 @@ PCA_Plot <- ggplot(Plotting_PCA, aes(PC1, PC2, col = Condition, fill = Condition
 
 print(PCA_Plot)
 
+#Checking to see if protein abundance data is normalized
 
+scaledraw_counts <- fread("/Users/chelseahughes/Desktop/Histone Analysis/Embryo Protein Abundance/Proteinlog2.csv", sep=',', header=TRUE, na.strings=c("", NA))
+
+scaledraw_counts %>% na.omit()
+
+scaledraw_counts<-as.data.frame(scaledraw_counts)
+
+
+Protein_Name<-as.vector(scaledraw_counts$Protein_Name)
+
+
+
+row.names(scaledraw_counts) <- Protein_Name
+
+scaledraw_counts = scaledraw_counts[c(3:14)]
+
+
+
+sample_info <- fread('/Users/chelseahughes/Desktop/Histone Analysis/Calculation for Embryos Samples/Meta Data.csv', sep=',', header=TRUE)
+
+
+
+count.mat <- as.matrix(scaledraw_counts)
+
+
+
+df_raw <- melt(count.mat, id = colnames(count.mat))
+
+names(df_raw)[1:2]<- c("Gene", "Sample")
+
+p<- ggplot(df_raw, aes(x=value, color=Sample))
+
+p<-p + geom_density() 
+
+p<-p + ylab("Density") + xlab("log2(counts)")
+
+p<-p + theme_bw()
+
+p<-p + theme(title = element_text(size=20))
+
+print(p)

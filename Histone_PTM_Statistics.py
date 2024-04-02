@@ -145,5 +145,20 @@ for index, row in GroupedAA.iterrows():
 datastats["Normoxic_Average"]=Normoxic_Average 
 datastats["Anoxic_Average"]=Anoxic_Average 
 datastats.to_csv(base_path+'/ResidueCoverageByPTM.csv', index=False)
+
+#Normalizing protein abundance by obtaining log2
   
-  
+data = read_csv("/Users/chelseahughes/Desktop/Histone Analysis/Embryo Protein Abundance/Protein Abundance for Embryos (calculations).csv",header=0)
+datastats= data.iloc[:,0:2]
+datastats=pd.concat([datastats, data.iloc[:,5:51].apply(np.log2) ], axis=1, join="inner")
+datastats=datastats.replace(-np.inf, 0)
+datastats.to_csv('/Users/chelseahughes/Desktop/Histone Analysis/Embryo Protein Abundance/Proteinlog2.csv', index=False) 
+
+#Statistics on log2 Protein Abundance
+data = read_csv("/Users/chelseahughes/Desktop/Histone Analysis/Embryo Protein Abundance/Proteinlog2.csv",header=0)
+datastats= data.iloc[:,0:1]
+datastats=datastats.replace(-np.inf, 0)
+datastats['T-test_t_statistic'], datastats['T-test_p_value'] = ttest_ind(data.iloc[:,8:14], data.iloc[:,2:8],axis=1)
+datastats['T-test_p_value'] = datastats['T-test_p_value'].fillna(1)
+datastats['corrected_p_values'] = multipletests(datastats['T-test_p_value'], method='fdr_bh')[1]
+datastats.to_csv("/Users/chelseahughes/Desktop/Histone Analysis/Embryo Protein Abundance/Proteinlog2stats.csv", index=False)
